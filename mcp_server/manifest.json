@@ -1,48 +1,31 @@
 {
   "manifest_version": "2.0.0",
   "app_uuid": "d6396060-db9c-467a-bc7d-e754fc301ffa",
-  "app_id": "mcpcheck",
+  "app_id": "mcp_server",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
-    "title": "MCPCheck",
-    "media": [
-      {
-        "media_type": "image",
-        "caption": "FILL IN Image 1 caption",
-        "image_url": "<FILL IN>"
-      },
-      {
-        "media_type": "image",
-        "caption": "FILL IN Image 2 caption",
-        "image_url": "<FILL IN>"
-      },
-      {
-        "media_type": "image",
-        "caption": "FILL IN Image 3 caption",
-        "image_url": "<FILL IN>"
-      }
-    ],
+    "description": "Monitor the health, reachability, latency, and tool/resource/prompt catalogs of your MCP (Model Context Protocol) servers.",
+    "title": "MCP Server",
+    "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::AI/ML",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
     "integration": {
       "auto_install": true,
       "source_type_id": 80386038,
-      "source_type_name": "MCPCheck",
+      "source_type_name": "MCP Server",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -50,13 +33,16 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "mcpcheck.",
-        "check": "",
+        "prefix": "mcp.",
+        "check": "mcp.server.protocol_version",
         "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
       }
     },
     "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
+      "MCP Server Overview": "assets/dashboards/mcp_server_overview.json"
     },
     "monitors": {},
     "saved_views": {}

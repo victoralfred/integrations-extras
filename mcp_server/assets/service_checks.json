@@ -1,0 +1,14 @@
+[
+  {
+    "agent_version": "7.0.0",
+    "integration": "MCP Server",
+    "check": "mcp.server.reachable",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [],
+    "name": "MCP server reachable",
+    "description": "Returns OK if the MCP server completes the `initialize` handshake, CRITICAL on a connection error, non-2xx response, or a JSON-RPC error during initialization."
+  }
+]
