@@ -1,9 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-mcp.server.protocol_version,gauge,,,,"Constant 1 carrying the negotiated MCP protocol version and server identity as tags (protocol_version, server_name, server_version).",0,mcp_server,protocol version,,
-mcp.server.tools.count,gauge,,,,Number of tools returned by the tools/list call.,0,mcp_server,tools count,,
-mcp.server.resources.count,gauge,,,,Number of resources returned by the resources/list call.,0,mcp_server,resources count,,
-mcp.server.prompts.count,gauge,,,,Number of prompts returned by the prompts/list call.,0,mcp_server,prompts count,,
-mcp.server.initialize.duration,gauge,,millisecond,,Wall-clock duration of the initialize handshake.,0,mcp_server,initialize duration,,
-mcp.server.list.duration,gauge,,millisecond,,"Wall-clock duration of each list call, tagged by capability.",0,mcp_server,list duration,,capability
-mcp.server.error.count,count,,,,"Number of JSON-RPC errors returned, tagged by jsonrpc_method and error_code.",0,mcp_server,error count,,
-mcp.server.catalog_change.count,count,,,,"Incremented when a catalog count differs from the previous run; detects tool/resource/prompt schema drift.",0,mcp_server,catalog change count,,capability
+mcp.server.protocol_version,gauge,,,,"Always reports the value 1; a marker metric whose tags expose the MCP protocol version negotiated during the initialize handshake (protocol_version) and the server's self-reported name (server_name) and version (server_version). Use it to track which protocol and server versions are running across your fleet.",0,mcp_server,protocol version,,
+mcp.server.tools.count,gauge,,,,"The number of tools the MCP server currently exposes, as reported by its tools/list response.",0,mcp_server,tools count,,
+mcp.server.resources.count,gauge,,,,"The number of resources the MCP server currently exposes, as reported by its resources/list response.",0,mcp_server,resources count,,
+mcp.server.prompts.count,gauge,,,,"The number of prompts the MCP server currently exposes, as reported by its prompts/list response.",0,mcp_server,prompts count,,
+mcp.server.initialize.duration,gauge,,millisecond,,The time the MCP server took to complete the initialize handshake during this check run.,0,mcp_server,initialize duration,,
+mcp.server.list.duration,gauge,,millisecond,,"The time the MCP server took to respond to a catalog list request during this check run. The capability tag identifies which list was called: tools, resources, or prompts.",0,mcp_server,list duration,,capability
+mcp.server.error.count,count,,,,"The number of JSON-RPC error responses the MCP server returned during this check run. The jsonrpc_method tag identifies the request that failed and the error_code tag holds the JSON-RPC error code.",0,mcp_server,error count,,
+mcp.server.catalog_change.count,count,,,,"Counts how many times a catalog's size changed between consecutive check runs (for example, a tool being added or removed). The capability tag identifies which catalog changed: tools, resources, or prompts.",0,mcp_server,catalog change count,,capability
