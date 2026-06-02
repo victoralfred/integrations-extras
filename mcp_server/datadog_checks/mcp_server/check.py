@@ -22,7 +22,7 @@ import time
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .__about__ import __version__
-from .client import JSONRPCError, MCPClient, MCPError
+from .client import JSONRPCError, MCPClient
 
 # The capabilities we enumerate each run: (capability key, JSON-RPC method,
 # count metric). The capability key is also the field name in the result that
@@ -74,20 +74,24 @@ class MCPServerCheck(AgentCheck):
             )
         except JSONRPCError as e:
             self._emit_error(base_tags, 'initialize', e.code)
-            self.service_check(
-                self.SERVICE_CHECK_REACHABLE, AgentCheck.CRITICAL, tags=base_tags, message=str(e)[:200]
-            )
+            self.service_check(self.SERVICE_CHECK_REACHABLE, AgentCheck.CRITICAL, tags=base_tags, message=str(e)[:200])
             return
         except Exception as e:
             self.log.debug('initialize failed against %s', self.endpoint, exc_info=True)
-            self.service_check(
-                self.SERVICE_CHECK_REACHABLE, AgentCheck.CRITICAL, tags=base_tags, message=str(e)[:200]
-            )
+            self.service_check(self.SERVICE_CHECK_REACHABLE, AgentCheck.CRITICAL, tags=base_tags, message=str(e)[:200])
             return
 
+        # Confirm initialization (untimed: it is not part of initialize latency).
+        client.confirm_initialized()
+
         self.service_check(self.SERVICE_CHECK_REACHABLE, AgentCheck.OK, tags=base_tags)
-        self._emit_protocol_version(init, base_tags)
-        self._emit_catalogs(client, base_tags)
+        try:
+            self._emit_protocol_version(init, base_tags)
+            self._emit_catalogs(client, base_tags)
+        finally:
+            # Always tear the session down so the server does not accumulate one
+            # session per collection interval. Best-effort; never raises.
+            client.terminate()
 
     def _emit_protocol_version(self, init, base_tags):
         """Emit a constant gauge of 1 carrying the negotiated protocol version
@@ -101,15 +105,15 @@ class MCPServerCheck(AgentCheck):
         self.gauge('server.protocol_version', 1, tags=version_tags)
 
     def _emit_catalogs(self, client, base_tags):
-        """Query each capability's list endpoint, emit its count, and detect
-        catalog drift across runs. A failure on one capability is logged and
-        counted but does not stop the others."""
+        """Query each capability's list endpoint (following pagination), emit its
+        total count, and detect catalog drift across runs. A failure on one
+        capability is logged and counted but does not stop the others."""
         for capability, method, count_metric in CAPABILITIES:
             try:
-                result = self._timed_call(
-                    client.call,
+                items, capped = self._timed_call(
+                    client.list_all,
                     method,
-                    {},
+                    capability,
                     duration_metric='server.list.duration',
                     tags=base_tags,
                     duration_extra_tags=[f'capability:{capability}'],
@@ -124,16 +128,15 @@ class MCPServerCheck(AgentCheck):
                 self.log.warning('MCP %s returned a JSON-RPC error: %s', method, e)
                 self._emit_error(base_tags, method, e.code)
                 continue
-            except MCPError as e:
-                self.log.warning('MCP %s failed: %s', method, e)
-                self._emit_error(base_tags, method, type(e).__name__)
-                continue
             except Exception as e:
+                # MalformedResponse / connection / unexpected errors: report and
+                # move on so one capability cannot sink the whole run.
                 self.log.warning('MCP %s failed against %s: %s', method, self.endpoint, e)
                 self._emit_error(base_tags, method, type(e).__name__)
                 continue
 
-            items = result.get(capability, []) or []
+            if capped:
+                self.log.warning('MCP %s count may be truncated (pagination cap reached)', method)
             count = len(items)
             self.gauge(count_metric, count, tags=base_tags)
             self._detect_drift(capability, count, base_tags)
