@@ -1,0 +1,9 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+mcp.server.protocol_version,gauge,,,,"Constant 1 carrying the negotiated MCP protocol version and server identity as tags (protocol_version, server_name, server_version).",0,mcp_server,protocol version,,
+mcp.server.tools.count,gauge,,,,Number of tools returned by the tools/list call.,0,mcp_server,tools count,,
+mcp.server.resources.count,gauge,,,,Number of resources returned by the resources/list call.,0,mcp_server,resources count,,
+mcp.server.prompts.count,gauge,,,,Number of prompts returned by the prompts/list call.,0,mcp_server,prompts count,,
+mcp.server.initialize.duration,gauge,,millisecond,,Wall-clock duration of the initialize handshake.,0,mcp_server,initialize duration,,
+mcp.server.list.duration,gauge,,millisecond,,"Wall-clock duration of each list call, tagged by capability.",0,mcp_server,list duration,,capability
+mcp.server.error.count,count,,,,"Number of JSON-RPC errors returned, tagged by jsonrpc_method and error_code.",0,mcp_server,error count,,
+mcp.server.catalog_change.count,count,,,,"Incremented when a catalog count differs from the previous run; detects tool/resource/prompt schema drift.",0,mcp_server,catalog change count,,capability

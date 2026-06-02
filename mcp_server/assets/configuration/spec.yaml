@@ -1,0 +1,46 @@
+name: MCP Server
+files:
+- name: mcp_server.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: endpoint
+      required: true
+      description: |
+        The HTTP(S) endpoint of the MCP server's streamable-HTTP transport.
+        This is the URL the Agent POSTs JSON-RPC requests to (the `initialize`
+        handshake and the tools/resources/prompts list calls).
+      value:
+        type: string
+        example: http://localhost:8765/mcp
+    - name: server_name
+      required: false
+      description: |
+        A friendly name for this MCP server, attached to every metric and
+        service check as the `mcp_server` tag. If omitted, no `mcp_server`
+        tag is added.
+      value:
+        type: string
+        example: workshop-server
+    - template: instances/http
+      overrides:
+        auth_token.description: |
+          This block configures authentication for the MCP server. MCP-over-HTTP
+          servers commonly use a static bearer token or an API key in a header;
+          both are configured here the same way as for any HTTP integration.
+
+          Example, static bearer token:
+
+            auth_token:
+              reader:
+                type: file
+                path: /path/to/token
+              writer:
+                type: header
+                name: Authorization
+                value: "Bearer <TOKEN>"
+    - template: instances/default
